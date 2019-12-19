@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 )
-
+var id string
 func handleConnections(hub *hub, w http.ResponseWriter, r *http.Request) {
 	fmt.Println("i am new connection ")
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
@@ -21,8 +21,6 @@ func handleConnections(hub *hub, w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// Make sure we close the connection when the function returns
-	// defer ws.Close()
 
 	client := &client{ID: id, hub: hub, conn: ws}
 
@@ -35,10 +33,10 @@ func handleConnections(hub *hub, w http.ResponseWriter, r *http.Request) {
 		err := client.conn.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("error: %v", err)
-			// delete(hub.connections, client)
 			break
 		}
-		// Send the newly received message to the broadcast channel
+
+		// Send the newly received message to the receiver channel
 		client.hub.send <- msg
 	}
 

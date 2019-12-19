@@ -11,7 +11,6 @@ import (
 var upgrader = websocket.Upgrader{}
 
 func main() {
-
 	// Configure websocket route
 	hub := newHub()
 	go hub.run()
@@ -20,7 +19,6 @@ func main() {
 	})
 
 	// Start listening for incoming chat messages
-
 	log.Println("http server started on :8000")
 	err := http.ListenAndServe(":8000", nil)
 	if err != nil {
