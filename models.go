@@ -3,12 +3,24 @@ package main
 import (
 	"sync"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/websocket"
 )
 
 type message struct {
 	ID   string
 	Data string
+}
+type user struct {
+	UserID    string
+	FirstName string
+	LastName  string
+	Password  string
+}
+
+type claims struct {
+	UserID string `json:"username"`
+	jwt.StandardClaims
 }
 
 type client struct {

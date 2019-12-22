@@ -11,6 +11,16 @@ import (
 var upgrader = websocket.Upgrader{}
 
 func main() {
+	http.HandleFunc("/registration", func(w http.ResponseWriter, r *http.Request) {
+		handleUserRegistration(w, r)
+	})
+	http.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) {
+		signin(w, r)
+	})
+	http.HandleFunc("/welcome", func(w http.ResponseWriter, r *http.Request) {
+		welcome(w, r)
+	})
+
 	// Configure websocket route
 	hub := newHub()
 	go hub.run()
