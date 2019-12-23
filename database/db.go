@@ -1,4 +1,4 @@
-package main
+package database
 
 import (
 	"database/sql"
@@ -7,16 +7,19 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/sainath-everest/sample-chat-server/model"
+
+	//need for mysql connection
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func handleUserRegistration(w http.ResponseWriter, r *http.Request) {
+func HandleUserRegistration(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("mysql", "root:sai@test@tcp(127.0.0.1:3306)/testDb")
 	if err != nil {
 		panic(err.Error())
 	}
 	defer db.Close()
-	var newUser user
+	var newUser model.User
 	reqBody, err := ioutil.ReadAll(r.Body)
 	json.Unmarshal(reqBody, &newUser)
 	log.Println("newUser ", newUser)
@@ -28,13 +31,13 @@ func handleUserRegistration(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-func getUserByID(userID string) user {
+func GetUserByID(userID string) model.User {
 	db, err := sql.Open("mysql", "root:sai@test@tcp(127.0.0.1:3306)/testDb")
 	if err != nil {
 		panic(err.Error())
 	}
 	defer db.Close()
-	var user user
+	var user model.User
 	err = db.QueryRow("SELECT user_id,pass_word FROM user where user_id= ?", userID).Scan(&user.UserID, &user.Password)
 	return user
 

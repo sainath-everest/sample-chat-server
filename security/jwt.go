@@ -1,4 +1,4 @@
-package main
+package security
 
 import (
 	"encoding/json"
@@ -6,27 +6,31 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/sainath-everest/sample-chat-server/model"
+
+	"github.com/sainath-everest/sample-chat-server/database"
+
 	"github.com/dgrijalva/jwt-go"
 )
 
 var jwtKey = []byte("my_secret_key")
 
-func signin(w http.ResponseWriter, r *http.Request) {
-	var signedUser user
+func Signin(w http.ResponseWriter, r *http.Request) {
+	var signedUser model.User
 	err := json.NewDecoder(r.Body).Decode(&signedUser)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	var expectedUser user = getUserByID(signedUser.UserID)
+	var expectedUser model.User = database.GetUserByID(signedUser.UserID)
 
-	if (user{}) == expectedUser || expectedUser.Password != signedUser.Password {
+	if (model.User{}) == expectedUser || expectedUser.Password != signedUser.Password {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	expirationTime := time.Now().Add(5 * time.Minute)
-	claims := &claims{
+	claims := &model.Claims{
 		UserID: signedUser.UserID,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
@@ -47,7 +51,7 @@ func signin(w http.ResponseWriter, r *http.Request) {
 	})
 
 }
-func welcome(w http.ResponseWriter, r *http.Request) {
+func Welcome(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie("token")
 	if err != nil {
 		if err == http.ErrNoCookie {
@@ -59,7 +63,7 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 	}
 	tknStr := c.Value
 
-	claims := &claims{}
+	claims := &model.Claims{}
 
 	tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil

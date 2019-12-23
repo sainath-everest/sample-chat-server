@@ -4,9 +4,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/sainath-everest/sample-chat-server/model"
 )
+
 var id string
-func handleConnections(hub *hub, w http.ResponseWriter, r *http.Request) {
+
+func handleConnections(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	fmt.Println("i am new connection ")
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	ids, ok := r.URL.Query()["id"]
@@ -22,22 +26,22 @@ func handleConnections(hub *hub, w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 
-	client := &client{ID: id, hub: hub, conn: ws}
+	client := &Client{ID: id, Hub: hub, Conn: ws}
 
 	// Register our new client
-	client.hub.register <- client
+	client.Hub.Register <- client
 
 	for {
-		var msg message
+		var msg model.Message
 		// Read in a new message as JSON and map it to a Message object
-		err := client.conn.ReadJSON(&msg)
+		err := client.Conn.ReadJSON(&msg)
 		if err != nil {
 			log.Printf("error: %v", err)
 			break
 		}
 
 		// Send the newly received message to the receiver channel
-		client.hub.send <- msg
+		client.Hub.Send <- msg
 	}
 
 }

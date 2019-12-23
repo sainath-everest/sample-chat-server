@@ -4,6 +4,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/sainath-everest/sample-chat-server/database"
+	"github.com/sainath-everest/sample-chat-server/security"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -12,13 +15,13 @@ var upgrader = websocket.Upgrader{}
 
 func main() {
 	http.HandleFunc("/registration", func(w http.ResponseWriter, r *http.Request) {
-		handleUserRegistration(w, r)
+		database.HandleUserRegistration(w, r)
 	})
 	http.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) {
-		signin(w, r)
+		security.Signin(w, r)
 	})
 	http.HandleFunc("/welcome", func(w http.ResponseWriter, r *http.Request) {
-		welcome(w, r)
+		security.Welcome(w, r)
 	})
 
 	// Configure websocket route
