@@ -5,14 +5,16 @@ import (
 )
 
 type Message struct {
-	ID   string
-	Data string
+	SenderID   string `json:"senderId"`
+	ReceiverID string `json:"receiverId"`
+	Data       string `json:"data"`
 }
 type User struct {
-	UserID    string
-	FirstName string
-	LastName  string
-	Password  string
+	UserID          string
+	FirstName       string
+	LastName        string
+	Password        string
+	ConfirmPassword string
 }
 
 type Claims struct {

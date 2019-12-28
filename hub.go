@@ -65,11 +65,11 @@ func (h *Hub) run() {
 
 			}
 		case message := <-h.Send:
-			log.Println("message id ", message.ID)
-			if client, ok := h.Clients[message.ID]; ok {
+			log.Println("message id ", message.ReceiverID)
+			if client, ok := h.Clients[message.ReceiverID]; ok {
 				err := client.Conn.WriteJSON(message)
 				if err != nil {
-					h.UnsentMessageMap[message.ID] = append(h.UnsentMessageMap[message.ID], message)
+					h.UnsentMessageMap[message.ReceiverID] = append(h.UnsentMessageMap[message.ReceiverID], message)
 					client.Conn.Close()
 				}
 

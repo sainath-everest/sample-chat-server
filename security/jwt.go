@@ -3,6 +3,7 @@ package security
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 var jwtKey = []byte("my_secret_key")
 
 func Signin(w http.ResponseWriter, r *http.Request) {
+	log.Println("User SignIn")
 	var signedUser model.User
 	err := json.NewDecoder(r.Body).Decode(&signedUser)
 	if err != nil {
