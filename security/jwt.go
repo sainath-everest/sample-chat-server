@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/sainath-everest/sample-chat-server/model"
 
@@ -17,6 +16,7 @@ import (
 var jwtKey = []byte("my_secret_key")
 
 func Signin(w http.ResponseWriter, r *http.Request) {
+	var loginStatus string
 	log.Println("User SignIn")
 	var signedUser model.User
 	err := json.NewDecoder(r.Body).Decode(&signedUser)
@@ -27,30 +27,36 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 	var expectedUser model.User = database.GetUserByID(signedUser.UserID)
 
 	if (model.User{}) == expectedUser || expectedUser.Password != signedUser.Password {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
+		//w.WriteHeader(http.StatusUnauthorized)
+		//return
+		loginStatus = "fail"
+	} else {
+		loginStatus = "success"
+
 	}
 
-	expirationTime := time.Now().Add(5 * time.Minute)
-	claims := &model.Claims{
-		UserID: signedUser.UserID,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
-		},
-	}
+	// expirationTime := time.Now().Add(5 * time.Minute)
+	// claims := &model.Claims{
+	// 	UserID: signedUser.UserID,
+	// 	StandardClaims: jwt.StandardClaims{
+	// 		ExpiresAt: expirationTime.Unix(),
+	// 	},
+	// }
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(jwtKey)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	// token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// tokenString, err := token.SignedString(jwtKey)
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	return
+	// }
 
-	http.SetCookie(w, &http.Cookie{
-		Name:    "token",
-		Value:   tokenString,
-		Expires: expirationTime,
-	})
+	// http.SetCookie(w, &http.Cookie{
+	// 	Name:    "token",
+	// 	Value:   tokenString,
+	// 	Expires: expirationTime,
+	// })
+	log.Println(loginStatus)
+	w.Write([]byte(loginStatus))
 
 }
 func Welcome(w http.ResponseWriter, r *http.Request) {

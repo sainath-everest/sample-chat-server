@@ -14,6 +14,7 @@ import (
 )
 
 func HandleUserRegistration(w http.ResponseWriter, r *http.Request) {
+	var registrationStatus string
 	db, err := sql.Open("mysql", "root:sai@test@tcp(127.0.0.1:3306)/testDb")
 	if err != nil {
 		panic(err.Error())
@@ -23,12 +24,21 @@ func HandleUserRegistration(w http.ResponseWriter, r *http.Request) {
 	reqBody, err := ioutil.ReadAll(r.Body)
 	json.Unmarshal(reqBody, &newUser)
 	log.Println("newUser ", newUser)
-	insForm, err := db.Prepare("INSERT INTO user(user_id,first_name,last_name,pass_word,creation_date) VALUES(?,?,?,?,NOW())")
-	insForm.Exec(newUser.UserID, newUser.FirstName, newUser.LastName, newUser.Password)
+	var user = GetUserByID(newUser.UserID)
+	if (model.User{}) == user {
+		insForm, err := db.Prepare("INSERT INTO user(user_id,first_name,last_name,pass_word,creation_date) VALUES(?,?,?,?,NOW())")
+		insForm.Exec(newUser.UserID, newUser.FirstName, newUser.LastName, newUser.Password)
+		if err != nil {
+			log.Printf(err.Error())
 
-	if err != nil {
-		panic(err.Error())
+		}
+		registrationStatus = "success"
+
+	} else {
+		registrationStatus = "fail"
 	}
+	log.Println(registrationStatus)
+	w.Write([]byte(registrationStatus))
 
 }
 func GetUserByID(userID string) model.User {
