@@ -8,6 +8,7 @@ type Message struct {
 	SenderID   string `json:"senderId"`
 	ReceiverID string `json:"receiverId"`
 	Data       string `json:"data"`
+	Date       string `json:"date"`
 }
 type User struct {
 	UserID          string
