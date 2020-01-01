@@ -38,6 +38,8 @@ func handleConnections(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("error: %v", err)
 			break
+		} else {
+			msg.MessageType = "incoming"
 		}
 
 		// Send the newly received message to the receiver channel

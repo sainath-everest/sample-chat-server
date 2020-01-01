@@ -41,9 +41,13 @@ type Client struct {
 }
 
 func sendOfflineMessages(client *Client) {
+	log.Println("in sendOfflineMessages", client.ID)
 	for k, v := range client.Hub.UnsentMessageMap {
+		log.Println("it should work ", k)
 		if k == client.ID {
+			log.Println("client have any offline messages")
 			for i := 0; i < len(v); i++ {
+				log.Println("sending offline msg to client ", v[i])
 				client.Hub.Send <- v[i]
 
 			}
@@ -65,11 +69,14 @@ func (h *Hub) run() {
 
 			}
 		case message := <-h.Send:
-			log.Println("message id ", message.ReceiverID)
+			log.Println(" sending  message to  ", message.ReceiverID)
 			if client, ok := h.Clients[message.ReceiverID]; ok {
+				log.Println("before write message to client")
 				err := client.Conn.WriteJSON(message)
 				if err != nil {
+					log.Println("offline test before adding offline msg to map ", message)
 					h.UnsentMessageMap[message.ReceiverID] = append(h.UnsentMessageMap[message.ReceiverID], message)
+					log.Println("offline test after adding offline msg to map ", h.UnsentMessageMap[message.ReceiverID])
 					client.Conn.Close()
 				}
 
