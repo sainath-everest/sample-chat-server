@@ -2,9 +2,9 @@ package security
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/sainath-everest/sample-chat-server/model"
 
@@ -34,40 +34,44 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 		loginStatus = "success"
 
 	}
+	if loginStatus == "success" {
+		expirationTime := time.Now().Add(5 * time.Minute)
+		claims := &model.Claims{
+			UserID: signedUser.UserID,
+			StandardClaims: jwt.StandardClaims{
+				ExpiresAt: expirationTime.Unix(),
+			},
+		}
 
-	// expirationTime := time.Now().Add(5 * time.Minute)
-	// claims := &model.Claims{
-	// 	UserID: signedUser.UserID,
-	// 	StandardClaims: jwt.StandardClaims{
-	// 		ExpiresAt: expirationTime.Unix(),
-	// 	},
-	// }
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenString, err := token.SignedString(jwtKey)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 
-	// token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	// tokenString, err := token.SignedString(jwtKey)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	return
-	// }
+		http.SetCookie(w, &http.Cookie{
+			Name:    "token",
+			Value:   tokenString,
+			Expires: expirationTime,
+		})
 
-	// http.SetCookie(w, &http.Cookie{
-	// 	Name:    "token",
-	// 	Value:   tokenString,
-	// 	Expires: expirationTime,
-	// })
+	}
+
 	log.Println(loginStatus)
 	w.Write([]byte(loginStatus))
 
 }
-func Welcome(w http.ResponseWriter, r *http.Request) {
+func ValidateToken(w http.ResponseWriter, r *http.Request) bool {
 	c, err := r.Cookie("token")
+	log.Println("token", c)
 	if err != nil {
 		if err == http.ErrNoCookie {
 			w.WriteHeader(http.StatusUnauthorized)
-			return
+			return false
 		}
 		w.WriteHeader(http.StatusBadRequest)
-		return
+		return false
 	}
 	tknStr := c.Value
 
@@ -79,16 +83,17 @@ func Welcome(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err == jwt.ErrSignatureInvalid {
 			w.WriteHeader(http.StatusUnauthorized)
-			return
+			return false
 		}
 		w.WriteHeader(http.StatusBadRequest)
-		return
+		return false
 	}
 	if !tkn.Valid {
 		w.WriteHeader(http.StatusUnauthorized)
-		return
+		return false
 	}
 	// Finally, return the welcome message to the user, along with their
 	// username given in the token
-	w.Write([]byte(fmt.Sprintf("Welcome %s!", claims.UserID)))
+	//w.Write([]byte(fmt.Sprintf("Welcome %s!", claims.UserID)))
+	return true
 }
