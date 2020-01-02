@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"sync"
 
 	"github.com/gorilla/websocket"
+	"github.com/sainath-everest/sample-chat-server/database"
 	"github.com/sainath-everest/sample-chat-server/model"
 )
 
@@ -42,18 +44,24 @@ type Client struct {
 
 func sendOfflineMessages(client *Client) {
 	log.Println("in sendOfflineMessages", client.ID)
-	for k, v := range client.Hub.UnsentMessageMap {
-		log.Println("it should work ", k)
-		if k == client.ID {
-			log.Println("client have any offline messages")
-			for i := 0; i < len(v); i++ {
-				log.Println("sending offline msg to client ", v[i])
-				client.Hub.Send <- v[i]
+	messages := database.GetOfflineMessages(client.ID)
+	// for k, v := range client.Hub.UnsentMessageMap {
+	// //log.Println("it should work ", k)
+	// if k == client.ID {
+	// 	log.Println("client have any offline messages")
+	// 	for i := 0; i < len(v); i++ {
+	// 		log.Println("sending offline msg to client ", v[i])
+	// 		client.Hub.Send <- v[i]
 
-			}
-			delete(client.Hub.UnsentMessageMap, client.ID)
-		}
+	// 	}
+	// 	//delete(client.Hub.UnsentMessageMap, client.ID)
+	// }
+	// }
+	for index, message := range messages {
+		fmt.Printf("%v: %v\n", index, message)
+		client.Hub.Send <- message
 	}
+	database.DeleteOfflineMessages(client.ID)
 }
 
 func (h *Hub) run() {
@@ -75,8 +83,9 @@ func (h *Hub) run() {
 				err := client.Conn.WriteJSON(message)
 				if err != nil {
 					log.Println("offline test before adding offline msg to map ", message)
-					h.UnsentMessageMap[message.ReceiverID] = append(h.UnsentMessageMap[message.ReceiverID], message)
-					log.Println("offline test after adding offline msg to map ", h.UnsentMessageMap[message.ReceiverID])
+					database.StoreOfflineMessages(message)
+					//h.UnsentMessageMap[message.ReceiverID] = append(h.UnsentMessageMap[message.ReceiverID], message)
+					//log.Println("offline test after adding offline msg to map ", h.UnsentMessageMap[message.ReceiverID])
 					client.Conn.Close()
 				}
 
