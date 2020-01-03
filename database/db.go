@@ -111,3 +111,44 @@ func DeleteOfflineMessages(userID string) {
 	}
 
 }
+func GetAllUsers(w http.ResponseWriter, r *http.Request) {
+
+	ids, ok := r.URL.Query()["id"]
+
+	if !ok {
+		log.Println("Url Param 'key' is missing")
+		return
+	}
+	id := ids[0]
+	fmt.Println("id ", id)
+	db, err := sql.Open("mysql", "root:sai@test@tcp(127.0.0.1:3306)/testDb")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+	rows, err := db.Query("select user_id,first_name from user where user_id != ? ", id)
+	if err != nil {
+		fmt.Println(err)
+
+	}
+	var user model.User
+
+	var users []model.User
+	for rows.Next() {
+		err := rows.Scan(&user.UserID, &user.FirstName)
+		users = append(users, user)
+		if err != nil {
+			fmt.Println(err)
+
+		}
+	}
+	res, err := json.Marshal(users)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(res)
+
+}

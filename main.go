@@ -24,6 +24,9 @@ func main() {
 	http.HandleFunc("/signin", func(w http.ResponseWriter, r *http.Request) {
 		security.Signin(w, r)
 	})
+	http.HandleFunc("/getAllUsers", func(w http.ResponseWriter, r *http.Request) {
+		database.GetAllUsers(w, r)
+	})
 
 	// Configure websocket route
 	hub := newHub()

@@ -82,6 +82,7 @@ func (h *Hub) run() {
 				log.Println("before write message to client")
 				err := client.Conn.WriteJSON(message)
 				if err != nil {
+					log.Println(err)
 					log.Println("offline test before adding offline msg to map ", message)
 					database.StoreOfflineMessages(message)
 					//h.UnsentMessageMap[message.ReceiverID] = append(h.UnsentMessageMap[message.ReceiverID], message)
