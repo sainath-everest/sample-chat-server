@@ -27,11 +27,10 @@ type Hub struct {
 
 func newHub() *Hub {
 	return &Hub{
-		Send:             make(chan model.Message),
-		Register:         make(chan *Client),
-		Unregister:       make(chan *Client),
-		Clients:          make(map[string]*Client),
-		UnsentMessageMap: make(map[string][]model.Message),
+		Send:       make(chan model.Message),
+		Register:   make(chan *Client),
+		Unregister: make(chan *Client),
+		Clients:    make(map[string]*Client),
 	}
 }
 
@@ -45,18 +44,6 @@ type Client struct {
 func sendOfflineMessages(client *Client) {
 	log.Println("in sendOfflineMessages", client.ID)
 	messages := database.GetOfflineMessages(client.ID)
-	// for k, v := range client.Hub.UnsentMessageMap {
-	// //log.Println("it should work ", k)
-	// if k == client.ID {
-	// 	log.Println("client have any offline messages")
-	// 	for i := 0; i < len(v); i++ {
-	// 		log.Println("sending offline msg to client ", v[i])
-	// 		client.Hub.Send <- v[i]
-
-	// 	}
-	// 	//delete(client.Hub.UnsentMessageMap, client.ID)
-	// }
-	// }
 	for index, message := range messages {
 		fmt.Printf("%v: %v\n", index, message)
 		client.Hub.Send <- message
@@ -85,8 +72,6 @@ func (h *Hub) run() {
 					log.Println(err)
 					log.Println("offline test before adding offline msg to map ", message)
 					database.StoreOfflineMessages(message)
-					//h.UnsentMessageMap[message.ReceiverID] = append(h.UnsentMessageMap[message.ReceiverID], message)
-					//log.Println("offline test after adding offline msg to map ", h.UnsentMessageMap[message.ReceiverID])
 					client.Conn.Close()
 				}
 

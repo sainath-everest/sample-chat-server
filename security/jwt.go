@@ -27,8 +27,6 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 	var expectedUser model.User = database.GetUserByID(signedUser.UserID)
 
 	if (model.User{}) == expectedUser || expectedUser.Password != signedUser.Password {
-		//w.WriteHeader(http.StatusUnauthorized)
-		//return
 		loginStatus = "fail"
 	} else {
 		loginStatus = "success"
@@ -92,8 +90,5 @@ func ValidateToken(w http.ResponseWriter, r *http.Request) bool {
 		w.WriteHeader(http.StatusUnauthorized)
 		return false
 	}
-	// Finally, return the welcome message to the user, along with their
-	// username given in the token
-	//w.Write([]byte(fmt.Sprintf("Welcome %s!", claims.UserID)))
 	return true
 }

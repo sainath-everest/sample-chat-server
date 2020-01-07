@@ -22,18 +22,13 @@ func handleConnections(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	}
 	id := ids[0]
 	isValidToken := security.ValidateToken(w, r)
-	// Upgrade initial GET request to a websocket
 	if isValidToken {
 		ws, _ := upgrader.Upgrade(w, r, nil)
-
 		client := &Client{ID: id, Hub: hub, Conn: ws}
-
-		// Register our new client
 		client.Hub.Register <- client
 
 		for {
 			var msg model.Message
-			// Read in a new message as JSON and map it to a Message object
 			err := client.Conn.ReadJSON(&msg)
 			if err != nil {
 				log.Printf("error: %v", err)
@@ -42,7 +37,6 @@ func handleConnections(hub *Hub, w http.ResponseWriter, r *http.Request) {
 				msg.MessageType = "incoming"
 			}
 
-			// Send the newly received message to the receiver channel
 			client.Hub.Send <- msg
 		}
 
