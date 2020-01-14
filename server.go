@@ -16,13 +16,17 @@ func handleConnections(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	ids, ok := r.URL.Query()["id"]
 
+	token, ok := r.URL.Query()["token"]
+	log.Println("debug ", token)
+
 	if !ok {
 		log.Println("Url Param 'key' is missing")
 		return
 	}
 	id := ids[0]
-	isValidToken := security.ValidateToken(w, r)
+	isValidToken := security.ValidateToken(w, r, token[0])
 	if isValidToken {
+		log.Println("token is valid")
 		ws, _ := upgrader.Upgrade(w, r, nil)
 		client := &Client{ID: id, Hub: hub, Conn: ws}
 		client.Hub.Register <- client

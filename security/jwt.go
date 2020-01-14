@@ -33,7 +33,7 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 
 	}
 	if loginStatus == "success" {
-		expirationTime := time.Now().Add(5 * time.Minute)
+		expirationTime := time.Now().Add(2160 * time.Hour)
 		claims := &model.Claims{
 			UserID: signedUser.UserID,
 			StandardClaims: jwt.StandardClaims{
@@ -47,32 +47,25 @@ func Signin(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		log.Println(tokenString)
 
-		http.SetCookie(w, &http.Cookie{
-			Name:    "token",
-			Value:   tokenString,
-			Expires: expirationTime,
-		})
+		userLoginStatus := model.UserLoginStatus{tokenString, loginStatus}
+
+		js, err := json.Marshal(userLoginStatus)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(js)
 
 	}
-
-	log.Println(loginStatus)
-	w.Write([]byte(loginStatus))
 
 }
-func ValidateToken(w http.ResponseWriter, r *http.Request) bool {
-	c, err := r.Cookie("token")
-	log.Println("token", c)
-	if err != nil {
-		if err == http.ErrNoCookie {
-			w.WriteHeader(http.StatusUnauthorized)
-			return false
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		return false
-	}
-	tknStr := c.Value
+func ValidateToken(w http.ResponseWriter, r *http.Request, token string) bool {
 
+	tknStr := token
 	claims := &model.Claims{}
 
 	tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (interface{}, error) {

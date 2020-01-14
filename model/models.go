@@ -11,6 +11,10 @@ type Message struct {
 	Date        string `json:"date"`
 	MessageType string `json:"messageType"`
 }
+type UserLoginStatus struct {
+	Token          string `json:"token"`
+	IsLoginSuccess string `json:"isLoginSuccess"`
+}
 type User struct {
 	UserID          string
 	FirstName       string
