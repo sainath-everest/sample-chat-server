@@ -5,12 +5,14 @@ import (
 )
 
 type Message struct {
-	SenderID    string `json:"senderId"`
-	ReceiverID  string `json:"receiverId"`
-	Data        string `json:"data"`
-	Date        string `json:"date"`
-	MessageType string `json:"messageType"`
+	SenderID    string      `json:"senderId"`
+	ReceiverID  string      `json:"receiverId"`
+	Data        string      `json:"data"`
+	Date        string      `json:"date"`
+	MessageType string      `json:"messageType"`
+	Sdp         interface{} `json:"sdp"`
 }
+
 type UserLoginStatus struct {
 	Token          string `json:"token"`
 	IsLoginSuccess string `json:"isLoginSuccess"`
